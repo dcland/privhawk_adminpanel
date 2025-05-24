@@ -27,14 +27,48 @@ load_dotenv()
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from scanner_v1 import analyze_and_store  # Direct call to scan logic
-from auth import get_current, login, auth_callback, logout
+
+from authlib.integrations.starlette_client import OAuth
+from starlette.config import Config
 
 app = FastAPI(title="PrivHawk Admin Panel", docs_url="/__sysadmin__/docs", redoc_url=None)
 
-# Auth routes
-app.add_route("/login", login, methods=["GET"])
-app.add_route("/auth/callback", auth_callback, methods=["GET"])
-app.add_route("/logout", logout, methods=["GET"])
+# Auth setup
+config = Config(".env")
+oauth = OAuth(config)
+oauth.register(
+    name='google',
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+    client_kwargs={"scope": "openid email profile"},
+)
+
+@app.get("/login")
+async def login(request: Request):
+    redirect_uri = request.url_for("auth_callback")
+    return await oauth.google.authorize_redirect(request, redirect_uri)
+
+@app.get("/auth/callback")
+async def auth_callback(request: Request):
+    token = await oauth.google.authorize_access_token(request)
+    user = await oauth.google.parse_id_token(request, token)
+    allowed = os.getenv("ALLOWED_USERS", "").split(",")
+    if user["email"] not in allowed:
+        raise HTTPException(status_code=403, detail="Access denied")
+    request.session["user"] = dict(user)
+    return RedirectResponse(url="/__sysadmin__/ui")
+
+@app.get("/logout")
+async def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse(url="/")
+
+def get_current(request: Request):
+    user = request.session.get("user")
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return user
 
 BASE_DIR = Path(__file__).parent
 app.mount("/__sysadmin__/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
