@@ -21,6 +21,9 @@ from urllib.parse import urlparse
 from playwright.async_api import async_playwright
 import ast
 
+from dotenv import load_dotenv
+load_dotenv()
+
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from scanner_v1 import analyze_and_store  # Direct call to scan logic
 

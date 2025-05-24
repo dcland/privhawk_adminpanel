@@ -12,3 +12,4 @@ itsdangerous
 jinja2
 playwright
 bs4
+python-dotenv
