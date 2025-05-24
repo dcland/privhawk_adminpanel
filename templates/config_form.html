@@ -1,0 +1,18 @@
+{% extends "_base.html" %}
+{% block content %}
+<h2>⚙️ Configuration Editor</h2>
+<form method="post" action="/__sysadmin__/ui/config">
+  {% for key, val in config.items() %}
+    <div class="mb-4">
+      <label for="{{ key }}" class="form-label fw-bold">{{ key.replace('_', ' ').title() }}</label>
+
+      {% if val is mapping or val is sequence %}
+        <textarea name="{{ key }}" id="{{ key }}" class="form-control" rows="12">{{ val | tojson(indent=2) }}</textarea>
+      {% else %}
+        <input type="text" name="{{ key }}" id="{{ key }}" class="form-control" value="{{ val }}">
+      {% endif %}
+    </div>
+  {% endfor %}
+  <button type="submit" class="btn btn-primary">💾 Save Configuration</button>
+</form>
+{% endblock %}

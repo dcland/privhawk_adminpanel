@@ -1,0 +1,14 @@
+fastapi                # Web framework
+uvicorn[standard]      # ASGI server for FastAPI
+apscheduler            # Lightweight cron-style scheduler
+motor                  # Async MongoDB driver (uses PyMongo under the hood)
+python-multipart       # Handles form-data / file uploads
+pandas                 # Excel / CSV parsing
+openpyxl               # .xlsx engine used by pandas
+authlib 
+python-jose[cryptography] 
+python-multipart
+itsdangerous
+jinja2
+playwright
+bs4

@@ -1,0 +1,46 @@
+{% extends "_base.html" %}
+{% block content %}
+<h2>📡 URL Management</h2>
+
+<!-- Add Single URL -->
+<form hx-post="/__sysadmin__/urls"
+      hx-target="#url-table"
+      hx-swap="outerHTML"
+      class="row gy-2 gx-3 align-items-center mb-4">
+  <div class="col-md-5">
+    <input type="text" name="url" class="form-control" placeholder="https://example.com" required>
+  </div>
+  <div class="col-md-4">
+    <input type="text" name="account" class="form-control" placeholder="Client / Account" required>
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-success">➕ Add URL</button>
+  </div>
+</form>
+
+<!-- Import CSV -->
+<form hx-post="/__sysadmin__/urls/import"
+      hx-encoding="multipart/form-data"
+      hx-target="#url-table"
+      hx-swap="outerHTML"
+      hx-indicator="#import-spinner"
+      hx-on::after-request="document.querySelector('#import-success').style.display = 'block'"
+      class="row gy-2 gx-3 align-items-center mb-4">
+  <div class="col-md-5">
+    <input type="file" name="file" accept=".csv" class="form-control" required>
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-primary">📤 Import CSV & Scan</button>
+  </div>
+  <div class="col-auto" id="import-spinner" style="display: none;">
+    <div class="spinner-border text-secondary" role="status"></div>
+  </div>
+</form>
+<div id="import-success" class="alert alert-success" style="display: none;">
+  ✅ Import and scan completed successfully.
+</div>
+
+<!-- Dynamic Table Placeholder -->
+<div id="url-table" hx-get="/__sysadmin__/ui/urls/table" hx-trigger="load"></div>
+
+{% endblock %}

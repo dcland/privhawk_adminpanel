@@ -1,0 +1,28 @@
+<table class="table table-bordered table-sm align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>Account</th>
+      <th>URL</th>
+      <th>Cron</th>
+      <th>Next Run</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for job in jobs %}
+    <tr>
+      <td>{{ job.account }}</td>
+      <td>{{ job.url }}</td>
+      <td><code>{{ job.cron }}</code></td>
+      <td>{{ job.next or '—' }}</td>
+      <td>
+        <form hx-delete="/__sysadmin__/schedules/{{ job.id }}"
+              hx-target="#schedule-table"
+              hx-swap="outerHTML">
+          <button class="btn btn-sm btn-danger">🗑</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

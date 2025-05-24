@@ -1,0 +1,39 @@
+{% extends "_base.html" %}
+{% block content %}
+<h2>Run a Manual Scan</h2>
+
+<!-- Loading Spinner -->
+<div class="my-3" id="loading-spinner" style="display:none;">
+  <div class="d-flex align-items-center">
+    <strong>Scanning...</strong>
+    <div class="spinner-border ms-auto text-primary" role="status" aria-hidden="true"></div>
+  </div>
+</div>
+
+<!-- Scan Form -->
+<form hx-post="/__sysadmin__/scan/run"
+      hx-target="#run-result"
+      hx-swap="innerHTML"
+      hx-indicator="#loading-spinner"
+      hx-on::after-request="document.querySelector('#success-alert').style.display='block'">
+  <div class="row mb-3">
+    <div class="col">
+      <input name="url" class="form-control" placeholder="https://example.com" required>
+    </div>
+    <div class="col-2">
+      <input type="number" name="depth" class="form-control" value="0" min="0">
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-primary">Run</button>
+    </div>
+  </div>
+</form>
+
+<!-- Success Message -->
+<div id="success-alert" class="alert alert-success" style="display:none;">
+  ✅ Scan completed successfully.
+</div>
+
+<!-- Scan Output -->
+<pre id="run-result" class="bg-light p-3 rounded small"></pre>
+{% endblock %}

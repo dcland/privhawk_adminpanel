@@ -1,0 +1,16 @@
+{% extends "_base.html" %}
+{% block content %}
+<h2>Edit config.py</h2>
+
+<form method="post"
+      hx-post="/__sysadmin__/ui/config"
+      hx-target="#save-result"
+      hx-swap="innerHTML">
+  <div class="mb-3">
+    <textarea name="content" class="form-control" rows="25">{{ content | e }}</textarea>
+  </div>
+  <button class="btn btn-primary">💾 Save Config</button>
+</form>
+
+<div id="save-result" class="mt-3"></div>
+{% endblock %}
