@@ -14,4 +14,4 @@ playwright
 bs4
 python-dotenv
 authlib
-
+auth
