@@ -52,7 +52,8 @@ async def auth_callback(request: Request):
         )
 
     # Must pass a dict with the id_token only
-    user = await oauth.google.parse_id_token(request, {"id_token": id_token})
+    user = await oauth.google.parse_id_token(request, id_token)
+
 
     allowed = [e.strip().lower() for e in os.getenv("ALLOWED_USERS", "").split(",") if e.strip()]
     if allowed and user["email"].lower() not in allowed:
