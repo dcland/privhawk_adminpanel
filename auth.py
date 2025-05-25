@@ -24,6 +24,11 @@ async def login(request: Request):
 @app.get("/auth/callback")
 async def auth_callback(request: Request):
     token = await oauth.google.authorize_access_token(request)
+
+    if "id_token" not in token:
+        # Log or inspect the token for debugging
+        raise HTTPException(status_code=400, detail=f"id_token missing in token response: {token}")
+
     user = await oauth.google.parse_id_token(request, token)
     
     allowed = os.getenv("ALLOWED_USERS", "").split(",")
