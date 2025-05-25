@@ -5,6 +5,7 @@ import os
 from starlette.config import Config
 from fastapi import APIRouter, Request, HTTPException   # ← add APIRouter here
 
+print("LOADED AUTH:", __file__)
 
 # Load environment variables
 
