@@ -21,26 +21,27 @@ async def login(request: Request):
     redirect_uri = "https://privhawk.com/auth/callback"  # Hardcoded to avoid IP redirect
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
+
 @app.get("/auth/callback")
 async def auth_callback(request: Request):
     token = await oauth.google.authorize_access_token(request)
 
-    # Defensive check
+    # Avoid crash: gracefully handle missing id_token
     id_token = token.get("id_token")
     if not id_token:
-        # Print or log the full token dict to investigate
-        print("OAuth token response:", token)
-        raise HTTPException(status_code=400, detail="id_token is missing from the token response.")
+        print("OAuth token response missing id_token:", token)
+        raise HTTPException(status_code=400, detail="Google token did not include an id_token")
 
-    # Only call parse_id_token if id_token is present
-    user = await oauth.google.parse_id_token(request, token)
-    
+    # Safe to parse only now
+    user = await oauth.google.parse_id_token(request, {"id_token": id_token})
+
     allowed = os.getenv("ALLOWED_USERS", "").split(",")
     if user["email"] not in allowed:
         raise HTTPException(status_code=403, detail="Access denied")
 
     request.session["user"] = dict(user)
     return RedirectResponse(url="/__sysadmin__/ui")
+
 
 @app.get("/logout")
 async def logout(request: Request):
