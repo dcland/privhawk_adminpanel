@@ -39,22 +39,19 @@ async def login(request: Request):
 # ────────────────────────────────
 @router.get("/auth/callback")
 async def auth_callback(request: Request):
-    # Get token from Google using authorization code
     token = await oauth.google.authorize_access_token(request)
     print("FULL TOKEN FROM GOOGLE:", token)
 
-    # Defensive check — optional, but helpful
     if "id_token" not in token:
-        raise HTTPException(status_code=400, detail="id_token is missing from token response")
+        raise HTTPException(status_code=400, detail="Google token did not include id_token")
 
-    # ✅ This is the correct call — pass the full token dict
-    user = await oauth.google.parse_id_token(request, token)
+    # ✅ FIXED: correct keyword args
+    user = await oauth.google.parse_id_token(request=request, token=token)
 
     allowed = [e.strip().lower() for e in os.getenv("ALLOWED_USERS", "").split(",") if e.strip()]
     if allowed and user["email"].lower() not in allowed:
         raise HTTPException(status_code=403, detail="Access denied")
 
-    # Store user info in session
     request.session["user"] = dict(user)
     return RedirectResponse(url="/__sysadmin__/ui")
 
