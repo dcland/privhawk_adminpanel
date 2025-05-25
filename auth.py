@@ -3,6 +3,8 @@ from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 import os
 from starlette.config import Config
+from fastapi import APIRouter, Request, HTTPException   # ← add APIRouter here
+
 
 # Load environment variables
 
