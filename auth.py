@@ -18,7 +18,7 @@ oauth.register(
 
 @app.get("/login")
 async def login(request: Request):
-    redirect_uri = request.url_for("auth_callback")
+    redirect_uri = "https://privhawk.com/auth/callback"  # Hardcoded to avoid IP redirect
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 @app.get("/auth/callback")
