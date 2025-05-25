@@ -53,7 +53,7 @@ async def auth_callback(request: Request):
         raise HTTPException(status_code=400, detail="Missing stored nonce for session")
 
     # validate token with nonce
-    user = await oauth.google.parse_id_token(request, token, nonce=nonce)
+    user = await oauth.google.parse_id_token(token, nonce=nonce)
 
     allowed = os.getenv("ALLOWED_USERS", "").split(",")
     if user["email"] not in allowed:
