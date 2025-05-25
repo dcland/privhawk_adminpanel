@@ -3,6 +3,8 @@ from fastapi.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
 from starlette.config import Config
 import os
+from authlib.common.security import generate_token
+
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -30,9 +32,10 @@ router = APIRouter()
 # ────────────────────────────────
 @router.get("/login")
 async def login(request: Request):
-    # Use public hostname in production to avoid mismatches
+    nonce = generate_token()
+    request.session["nonce"] = nonce
     redirect_uri = "https://privhawk.com/auth/callback"
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    return await oauth.google.authorize_redirect(request, redirect_uri, nonce=nonce)
 
 # ────────────────────────────────
 # 3. OAuth callback
@@ -40,16 +43,20 @@ async def login(request: Request):
 @router.get("/auth/callback")
 async def auth_callback(request: Request):
     token = await oauth.google.authorize_access_token(request)
-    print("FULL TOKEN FROM GOOGLE:", token)
 
-    if "id_token" not in token:
-        raise HTTPException(status_code=400, detail="Google token did not include id_token")
+    id_token = token.get("id_token")
+    if not id_token:
+        raise HTTPException(status_code=400, detail="Missing id_token in token response")
 
-    # ✅ FIXED: correct keyword args
-    user = await oauth.google.parse_id_token(dict(token), request, os.getenv("SESSION_SECRET"))
+    nonce = request.session.get("nonce")
+    if not nonce:
+        raise HTTPException(status_code=400, detail="Missing stored nonce for session")
 
-    allowed = [e.strip().lower() for e in os.getenv("ALLOWED_USERS", "").split(",") if e.strip()]
-    if allowed and user["email"].lower() not in allowed:
+    # validate token with nonce
+    user = await oauth.google.parse_id_token(request, token, nonce=nonce)
+
+    allowed = os.getenv("ALLOWED_USERS", "").split(",")
+    if user["email"] not in allowed:
         raise HTTPException(status_code=403, detail="Access denied")
 
     request.session["user"] = dict(user)
