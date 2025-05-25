@@ -22,6 +22,8 @@ from playwright.async_api import async_playwright
 import ast
 import json
 from dotenv import load_dotenv
+from auth import router as auth_router
+
 
 load_dotenv()
 
@@ -31,7 +33,7 @@ from scanner_v1 import analyze_and_store  # Direct call to scan logic
 from authlib.integrations.starlette_client import OAuth
 from starlette.config import Config
 
-app = FastAPI(title="PrivHawk Admin Panel", docs_url="/__sysadmin__/docs", redoc_url=None)
+app = FastAPI(title="PrivHawk Admin")
 
 # Auth setup
 config = Config(".env")
@@ -74,7 +76,11 @@ BASE_DIR = Path(__file__).parent
 app.mount("/__sysadmin__/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
+# 32-byte secret for session cookies
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET", "dev-key"))
+# Mount the Google-OAuth routes
+app.include_router(auth_router)
+
 
 mongo: AsyncIOMotorClient | None = None
 scheduler = AsyncIOScheduler()
