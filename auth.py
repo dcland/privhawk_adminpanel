@@ -4,6 +4,9 @@ from authlib.integrations.starlette_client import OAuth
 from starlette.config import Config
 import os
 
+from dotenv import load_dotenv
+load_dotenv()
+
 print("LOADED AUTH:", __file__)
 
 # ────────────────────────────────
