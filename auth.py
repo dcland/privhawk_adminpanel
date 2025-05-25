@@ -46,7 +46,7 @@ async def auth_callback(request: Request):
         raise HTTPException(status_code=400, detail="Google token did not include id_token")
 
     # ✅ FIXED: correct keyword args
-    user = await oauth.google.parse_id_token(request, token)
+    user = await oauth.google.parse_id_token(dict(token), request, os.getenv("SESSION_SECRET"))
 
     allowed = [e.strip().lower() for e in os.getenv("ALLOWED_USERS", "").split(",") if e.strip()]
     if allowed and user["email"].lower() not in allowed:
